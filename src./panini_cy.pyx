@@ -50,19 +50,6 @@ cpdef np.ndarray many_sim_panini_cost(np.ndarray record_of_packs_opened):
     for i in range(n):
         record_of_cost[i] = record_of_packs_opened[i] * cost
     return record_of_cost
-# Statistical analysis of N attempts.
-cdef double mean(double[::1] arr, int N):
-    cdef int i
-    cdef double total = 0
-    for i in range(N):
-        total += arr[i]
-    return total/N
-cdef double sd(double[::1] arr, int N, double mean):
-    cdef int i
-    cdef double sd = 0
-    for i in range(N):
-        sd += pow(arr[i] - mean, 2)
-    return sqrt(sd/N)
 # Main function of 10000 attempts
 def main():
     cdef int N = 10000
@@ -74,17 +61,16 @@ def main():
     plt.show()
     cdef double mu_pack, LQ_pack, sigma_pack, median_pack, UQ_pack, mu_cost, sigma_cost, LQ_cost, median_cost, UQ_cost
     # Statistical quantities (packs).
-    mu_pack = mean(pack_data, N)
-    sigma_pack = sd(pack_data, N, mu_pack)
+    mu_pack = np.mean(pack_data, N)
+    sigma_pack = np.std(pack_data, N, mu_pack)
     LQ_pack = np.quantile(pack_data, 0.25)
     median_pack = np.median(pack_data)
     UQ_pack = np.quantile(pack_data, 0.75)
     # Statistical quantities (cost).
-    mu_cost = mean(cost_data, N)
-    sigma_cost = sd(pack_data, N, mu_cost)
+    mu_cost = np.mean(cost_data, N)
+    sigma_cost = np.std(cost_data, N, mu_cost)
     LQ_cost = np.quantile(cost_data, 0.25)
     median_cost = np.median(cost_data)
     UQ_cost = np.quantile(cost_data, 0.75)
-
 if __name__ == '__main__':
     main()
