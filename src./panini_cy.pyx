@@ -61,14 +61,14 @@ def main():
     plt.show()
     cdef double mu_pack, LQ_pack, sigma_pack, median_pack, UQ_pack, mu_cost, sigma_cost, LQ_cost, median_cost, UQ_cost
     # Statistical quantities (packs).
-    mu_pack = np.mean(pack_data, N)
-    sigma_pack = np.std(pack_data, N, mu_pack)
+    mu_pack = np.mean(pack_data)
+    sigma_pack = np.std(pack_data)
     LQ_pack = np.quantile(pack_data, 0.25)
     median_pack = np.median(pack_data)
     UQ_pack = np.quantile(pack_data, 0.75)
     # Statistical quantities (cost).
-    mu_cost = np.mean(cost_data, N)
-    sigma_cost = np.std(cost_data, N, mu_cost)
+    mu_cost = np.mean(cost_data)
+    sigma_cost = np.std(cost_data)
     LQ_cost = np.quantile(cost_data, 0.25)
     median_cost = np.median(cost_data)
     UQ_cost = np.quantile(cost_data, 0.75)
