@@ -1,9 +1,9 @@
-from distutils.core import setup
+from setuptools import setup
 from Cython.Build import cythonize
-
 import Cython.Compiler.Options
 Cython.Compiler.Options.annotate = True
+import numpy
 
 setup(
-    ext_modules = cythonize('GOL_cy.pyx', annotate = True)
-    )
+    ext_modules = cythonize('panini.pyx', annotate = True), include_dirs=[numpy.get_include()]
+)
