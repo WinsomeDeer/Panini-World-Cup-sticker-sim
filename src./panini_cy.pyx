@@ -6,6 +6,7 @@ import cython
 from libc.stdlib cimport rand, srand
 from libc.math cimport sqrt, pow
 from libc.time cimport time
+import time as T
 srand(time(NULL))
 # C function to sum all the elements.
 cdef int arr_sum(int[::1] arr):
@@ -15,46 +16,56 @@ cdef int arr_sum(int[::1] arr):
         total += arr[i]
     return total
 # C function to simulate pack.
-cdef np.ndarray pack_sim():
+cdef int[::1] pack_sim():
     cdef int i
-    cdef np.ndarray pack = np.empty(5, dtype = np.int32)
+    cdef np.ndarray pack = np.zeros(5, dtype = np.intc)
+    cdef int[::1] pack_view = pack
     for i in range(5):
-        pack[i] = rand() % 638
-    return pack
+        pack_view[i] = rand() % 638
+    return pack_view
 # Simulate a single attempt to collect all the cards.
-cpdef int single_sim_panini(np.ndarray single_card_collection):
+cpdef int single_sim_panini(int[::1] single_card_collection):
     cdef int i, j
-    cdef np.ndarray pack = np.empty(5, dtype = np.int32)
+    cdef np.ndarray pack = np.empty(5, dtype = np.intc)
+    cdef int[::1] pack_view
     for i in range(10000):
-        pack = pack_sim()
+        pack_view = pack_sim()
         for j in range(5):
-            single_card_collection[pack[j]] = 0
+            single_card_collection[pack_view[j]] = 0
         if arr_sum(single_card_collection) == 0:
             break
     return i
 # Simulate n sticker collection attempts.
-cpdef np.ndarray many_sim_panini(int n):
-    cdef int i
-    record_of_packs_opened = np.zeros((n,), dtype = int)
+cpdef int[::1] many_sim_panini(int n):
+    cdef int i, pack_attempt
+    cdef np.ndarray record_of_packs_opened = np.empty(n, dtype = np.intc)
+    cdef np.ndarray collect_attempt
+    cdef int[::1] ROPO_view = record_of_packs_opened
+    cdef int[::1] collect_attempt_view
     for i in range(n):
-        collect_attempt = np.ones((638,), dtype = int)
-        pack_attempt = single_sim_panini(collect_attempt)
-        record_of_packs_opened[i] = pack_attempt
-    return record_of_packs_opened
+        collect_attempt = np.ones((638,), dtype = np.intc)
+        collect_attempt_view = collect_attempt
+        pack_attempt = single_sim_panini(collect_attempt_view)
+        ROPO_view[i] = pack_attempt
+    return ROPO_view
 # Simulate n sticker collection attempts (cost).
-cpdef np.ndarray many_sim_panini_cost(np.ndarray record_of_packs_opened):
+cpdef double[::1] many_sim_panini_cost(int[::1] record_of_packs_opened):
     cdef int i
     cdef Py_ssize_t n = len(record_of_packs_opened)
     cdef double cost = 0.80
-    record_of_cost = np.empty(n, dtype = np.double)
+    cdef np.ndarray record_of_cost = np.zeros(n, dtype = np.double)
+    cdef double[::1] record_of_cost_view = record_of_cost 
     for i in range(n):
-        record_of_cost[i] = record_of_packs_opened[i] * cost
-    return record_of_cost
+        record_of_cost_view[i] = record_of_packs_opened[i] * cost
+    return record_of_cost_view
 # Main function of 10000 attempts
 def main():
     cdef int N = 10000
+    start = T.time()
     pack_data = many_sim_panini(N)
     cost_data = many_sim_panini_cost(pack_data)
+    end = T.time()
+    print(end-start)
     # Histograms of the data.
     plt.hist(pack_data, bins = 100)
     plt.hist(cost_data, bins = 100)
